@@ -1,0 +1,95 @@
+name: build
+
+# Build a pinned, checksum-verified custom Caddy binary and publish it as a
+# GitHub Release. Tags matching v* (e.g. v2.11.3-a5t.1) cut a release;
+# workflow_dispatch builds and verifies without releasing (handy for testing a
+# versions.env bump before tagging).
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # required by the release step to create the GitHub Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # versions.env is the single source of truth. Strip comments/blank lines
+      # and export every KEY=value into the job environment so subsequent steps
+      # (and build.sh) all read the same pinned versions.
+      - name: Load pinned versions
+        run: grep -vE '^[[:space:]]*(#|$)' versions.env >> "$GITHUB_ENV"
+
+      - name: Set up Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install xcaddy ${{ env.XCADDY_VERSION }}
+        run: |
+          go install github.com/caddyserver/xcaddy/cmd/xcaddy@${XCADDY_VERSION}
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      # build.sh runs the exact same xcaddy invocation as a local build,
+      # reading versions.env. CGO_ENABLED=0 / GOOS=linux / GOARCH=amd64 and
+      # GOTOOLCHAIN=local are set inside build.sh.
+      - name: Build caddy-linux-amd64
+        run: ./build.sh caddy-linux-amd64
+
+      # list-modules exits 0 even when a module is missing, so assert explicitly.
+      # This gates the release: a binary missing any required module never ships.
+      - name: Verify required modules
+        run: |
+          set -euo pipefail
+          ./caddy-linux-amd64 version | grep -q "${CADDY_VERSION}" \
+            || { echo "::error::caddy version is not ${CADDY_VERSION}"; ./caddy-linux-amd64 version; exit 1; }
+          mods="$(./caddy-linux-amd64 list-modules)"
+          for id in http.handlers.cache storages.cache.redis dns.providers.desec; do
+            echo "$mods" | grep -Fxq "$id" \
+              || { echo "::error::missing required module: $id"; exit 1; }
+          done
+          echo "OK: ${CADDY_VERSION} with http.handlers.cache, storages.cache.redis, dns.providers.desec"
+
+      - name: Generate SHA256SUMS
+        run: sha256sum caddy-linux-amd64 > SHA256SUMS
+
+      # Compose release notes carrying the asset sha256 (so the consuming Ansible
+      # role can copy the exact `sha256:<hash>` string) and the module IDs.
+      - name: Compose release notes
+        run: |
+          SHA="$(awk '{print $1}' SHA256SUMS)"
+          {
+            echo "Custom Caddy **${CADDY_VERSION}** — linux/amd64, static (\`CGO_ENABLED=0\`)."
+            echo
+            echo "## Asset checksum"
+            echo "\`\`\`"
+            cat SHA256SUMS
+            echo "\`\`\`"
+            echo "Ansible \`get_url\` checksum: \`sha256:${SHA}\`"
+            echo
+            echo "## Compiled-in modules"
+            echo "| Module ID | Source | Version |"
+            echo "| --- | --- | --- |"
+            echo "| \`http.handlers.cache\` | github.com/caddyserver/cache-handler | ${CACHE_HANDLER_VERSION} |"
+            echo "| \`storages.cache.redis\` | github.com/darkweak/storages/redis/caddy | ${STORAGES_REDIS_VERSION} |"
+            echo "| \`dns.providers.desec\` | github.com/caddy-dns/desec | ${DESEC_VERSION} |"
+          } > RELEASE_NOTES.md
+          cat RELEASE_NOTES.md
+
+      # Only release on a tag (tag push, or workflow_dispatch targeting a tag).
+      # Branch dispatch runs build+verify above and stops here.
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES.md
+          fail_on_unmatched_files: true
+          files: |
+            caddy-linux-amd64
+            SHA256SUMS

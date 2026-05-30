@@ -1,0 +1,7 @@
+# Build artifacts — produced by build.sh / CI, never committed.
+# The release workflow rebuilds these from pinned versions on every tag.
+/caddy
+/caddy-linux-amd64
+/SHA256SUMS
+/RELEASE_NOTES.md
+*.exe
