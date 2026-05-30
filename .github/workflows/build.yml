@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # versions.env is the single source of truth. Strip comments/blank lines
       # and export every KEY=value into the job environment so subsequent steps
@@ -27,7 +27,7 @@ jobs:
         run: grep -vE '^[[:space:]]*(#|$)' versions.env >> "$GITHUB_ENV"
 
       - name: Set up Go ${{ env.GO_VERSION }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
 
@@ -86,7 +86,7 @@ jobs:
       # Branch dispatch runs build+verify above and stops here.
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           body_path: RELEASE_NOTES.md
           fail_on_unmatched_files: true
