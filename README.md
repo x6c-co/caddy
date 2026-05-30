@@ -72,11 +72,18 @@ releasing — useful to test a `versions.env` bump on a branch before tagging.
 
 ### Stable download URLs
 
-Per-tag, GitHub exposes stable asset URLs (replace `<OWNER>/<REPO>` and `<TAG>`):
+Per-tag, GitHub exposes stable asset URLs (substitute the release `<TAG>`):
 
 ```
-https://github.com/<OWNER>/<REPO>/releases/download/<TAG>/caddy-linux-amd64
-https://github.com/<OWNER>/<REPO>/releases/download/<TAG>/SHA256SUMS
+https://github.com/x6c-co/caddy/releases/download/<TAG>/caddy-linux-amd64
+https://github.com/x6c-co/caddy/releases/download/<TAG>/SHA256SUMS
+```
+
+For example, the current release `v2.11.3-a5t.1`:
+
+```
+https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.1/caddy-linux-amd64
+https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.1/SHA256SUMS
 ```
 
 The SHA256 is in `SHA256SUMS` and in the release notes (also given pre-formatted as
