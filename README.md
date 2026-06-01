@@ -64,13 +64,13 @@ downstream Ansible role asserts on — do not guess them:
 Tags drive releases. The convention is:
 
 ```
-v2.11.3-a5t.1
+v2.11.3-a5t.2
 └──┬──┘ └─┬─┘
  base    build suffix — bump the .N on every rebuild of the same base
 ```
 
 - **Rebuild (bump a module/Go/xcaddy version):** edit [`versions.env`](versions.env),
-  commit, then bump the `-a5t.N` suffix: `git tag v2.11.3-a5t.2 && git push origin v2.11.3-a5t.2`.
+  commit, then bump the `-a5t.N` suffix: `git tag v2.11.3-a5t.3 && git push origin v2.11.3-a5t.3`.
 - **Caddy upgrade:** bump `CADDY_VERSION` in `versions.env` and tag the new base, e.g.
   `v2.11.4-a5t.1`.
 
@@ -94,11 +94,11 @@ https://github.com/x6c-co/caddy/releases/download/<TAG>/caddy-linux-amd64
 https://github.com/x6c-co/caddy/releases/download/<TAG>/SHA256SUMS
 ```
 
-For example, the current release `v2.11.3-a5t.1`:
+For example, the current release `v2.11.3-a5t.2`:
 
 ```
-https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.1/caddy-linux-amd64
-https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.1/SHA256SUMS
+https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.2/caddy-linux-amd64
+https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.2/SHA256SUMS
 ```
 
 The SHA256 is in `SHA256SUMS` and in the release notes (also given pre-formatted as
