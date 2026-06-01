@@ -26,8 +26,12 @@ server we don't control.
   | `github.com/caddyserver/cache-handler` | `v0.16.0` | `cache`, `http.handlers.cache` |
   | `github.com/darkweak/storages/redis/caddy` | `v0.0.19` | `storages.cache.redis` |
   | `github.com/caddy-dns/desec` | `v1.1.0` | `dns.providers.desec` |
+  | `github.com/corazawaf/coraza-caddy/v2` | `v2.5.0` | `http.handlers.waf` (directive `coraza_waf`) |
 
   `caddy-dns/cloudflare` is intentionally **not** included (legacy, removed from the fleet).
+
+  The Coraza WAF (`http.handlers.waf`) is **compiled in but inert** — it embeds the OWASP Core
+  Rule Set v4 and does nothing until a downstream Caddyfile turns it on. See the note below.
 
 ### Captured module IDs (verified from the built binary)
 
@@ -36,11 +40,22 @@ downstream Ansible role asserts on — do not guess them:
 
 - HTTP cache handler: **`http.handlers.cache`** (`v0.16.0`)
 - Redis cache storage: **`storages.cache.redis`** (`v0.0.19`)
+- Coraza WAF handler: **`http.handlers.waf`** (`v2.5.0`, Caddyfile directive `coraza_waf`)
 
 > ⚠️ The Redis backend registers under Souin's cache-storage namespace as
 > **`storages.cache.redis`** — *not* `caddy.storage.redis` and *not* `caddy.storages.redis`.
 > It is a storage backend for the Souin HTTP cache, so it lives in `storages.cache.*`,
 > not Caddy's global `caddy.storage.*` namespace. Assert on `storages.cache.redis`.
+
+> ℹ️ **`http.handlers.waf` is compiled in but inert.** It does nothing at runtime until a
+> downstream Caddyfile uses the `coraza_waf` directive (which also needs the global
+> `{ order coraza_waf first }` option), loads rules (e.g. the embedded OWASP CRS v4 via
+> `load_owasp_crs`), and runs with `SecRuleEngine On`. A `list-modules` presence check
+> verifies **availability, not active protection** — do not read "module present" as "the
+> fleet is WAF-protected." All WAF configuration, rule tuning, and false-positive handling
+> live in the downstream (Ansible) repo, not here. The WAF also buffers request/response
+> bodies and does not pass through WebSockets or SSE, so downstream configs must matcher-
+> exclude streaming/upload/WebSocket routes — plan a `DetectionOnly` → tune → `On` rollout.
 
 `./caddy-linux-amd64 version` reports `v2.11.3`.
 
@@ -98,7 +113,7 @@ Reproduces the exact CI build (same `xcaddy` invocation, same versions):
 go install github.com/caddyserver/xcaddy/cmd/xcaddy@v0.4.5
 
 ./build.sh                 # -> ./caddy-linux-amd64
-./caddy-linux-amd64 list-modules | grep -E 'http.handlers.cache|storages.cache.redis'
+./caddy-linux-amd64 list-modules | grep -E 'http.handlers.cache|storages.cache.redis|http.handlers.waf'
 ```
 
 ### Go version note
@@ -118,6 +133,11 @@ artifact is designed to satisfy it, so keep these stable across releases:
 1. `get_url` the `caddy-linux-amd64` asset with `checksum: "sha256:<from SHA256SUMS>"`.
 2. Install to `/usr/bin/caddy`, `apt-mark hold caddy`, restart.
 3. Assert `caddy list-modules` contains `http.handlers.cache` **and** `storages.cache.redis`.
+
+`http.handlers.waf` (Coraza) is also present from the release that introduces it onward, but it
+is **optional and inert**: the role need not assert it and need not configure anything unless/until the fleet
+actually enables the `coraza_waf` directive (see the WAF note above). Adding a module ID is
+backward-compatible — it cannot break a `contains` assertion on the existing IDs.
 
 **Stability guarantees:** the asset name (`caddy-linux-amd64`), the `SHA256SUMS` format
 (`<sha256>  caddy-linux-amd64`), and the registered module IDs above will not change

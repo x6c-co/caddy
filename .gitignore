@@ -5,3 +5,6 @@
 /SHA256SUMS
 /RELEASE_NOTES.md
 *.exe
+
+# Local Claude Code harness state — never committed.
+/.claude/
