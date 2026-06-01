@@ -30,6 +30,10 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
+          # No committed go.mod/go.sum to key a module cache on (xcaddy resolves
+          # modules in an ephemeral build dir), so disable setup-go's cache to
+          # avoid a "Restore cache failed: Dependencies file is not found" warning.
+          cache: false
 
       - name: Install xcaddy ${{ env.XCADDY_VERSION }}
         run: |
