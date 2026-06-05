@@ -25,9 +25,9 @@ server we don't control.
   | --- | --- | --- |
   | `github.com/caddyserver/cache-handler` | `v0.16.0` | `cache`, `http.handlers.cache` |
   | `github.com/darkweak/storages/redis/caddy` | `v0.0.19` | `storages.cache.redis` |
+  | `github.com/pberkel/caddy-storage-redis` | `v1.8.0` | `caddy.storage.redis` |
   | `github.com/caddy-dns/desec` | `v1.1.0` | `dns.providers.desec` |
   | `github.com/corazawaf/coraza-caddy/v2` | `v2.5.0` | `http.handlers.waf` (directive `coraza_waf`) |
-  | `github.com/mholt/caddy-events-exec` | `v0.1.0` | `events.handlers.exec` |
 
   `caddy-dns/cloudflare` is intentionally **not** included (legacy, removed from the fleet).
 
@@ -40,14 +40,20 @@ These are read verbatim from `./caddy-linux-amd64 list-modules` and are the stri
 downstream Ansible role asserts on — do not guess them:
 
 - HTTP cache handler: **`http.handlers.cache`** (`v0.16.0`)
-- Redis cache storage: **`storages.cache.redis`** (`v0.0.19`)
+- Souin Redis cache storage: **`storages.cache.redis`** (`v0.0.19`)
+- Caddy global Redis storage: **`caddy.storage.redis`** (`v1.8.0`)
 - Coraza WAF handler: **`http.handlers.waf`** (`v2.5.0`, Caddyfile directive `coraza_waf`)
-- Events exec handler: **`events.handlers.exec`** (`v0.1.0`, event handler under the global `events` app)
 
-> ⚠️ The Redis backend registers under Souin's cache-storage namespace as
-> **`storages.cache.redis`** — *not* `caddy.storage.redis` and *not* `caddy.storages.redis`.
-> It is a storage backend for the Souin HTTP cache, so it lives in `storages.cache.*`,
-> not Caddy's global `caddy.storage.*` namespace. Assert on `storages.cache.redis`.
+> ⚠️ **Two distinct Redis modules are compiled in — don't confuse them.** They register
+> different IDs in different namespaces and do different jobs, and both can coexist:
+> - **`storages.cache.redis`** (`darkweak/storages/redis/caddy`) is a storage backend for the
+>   **Souin HTTP cache** — it lives in Souin's `storages.cache.*` namespace, *not* Caddy's
+>   global `caddy.storage.*`.
+> - **`caddy.storage.redis`** (`pberkel/caddy-storage-redis`) is a backend for **Caddy's global
+>   storage** (TLS certs/keys and other Caddy state) — it lives in `caddy.storage.*`.
+>
+> Assert on the exact ID for whichever role you mean: `storages.cache.redis` for the cache
+> backend, `caddy.storage.redis` for global storage.
 
 > ℹ️ **`http.handlers.waf` is compiled in but inert.** It does nothing at runtime until a
 > downstream Caddyfile uses the `coraza_waf` directive (which also needs the global
@@ -96,11 +102,11 @@ https://github.com/x6c-co/caddy/releases/download/<TAG>/caddy-linux-amd64
 https://github.com/x6c-co/caddy/releases/download/<TAG>/SHA256SUMS
 ```
 
-For example, the current release `v2.11.3-a5t.3`:
+For example, the current release `v2.11.3-a5t.4`:
 
 ```
-https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.3/caddy-linux-amd64
-https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.3/SHA256SUMS
+https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.4/caddy-linux-amd64
+https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.4/SHA256SUMS
 ```
 
 The SHA256 is in `SHA256SUMS` and in the release notes (also given pre-formatted as
@@ -115,7 +121,7 @@ Reproduces the exact CI build (same `xcaddy` invocation, same versions):
 go install github.com/caddyserver/xcaddy/cmd/xcaddy@v0.4.5
 
 ./build.sh                 # -> ./caddy-linux-amd64
-./caddy-linux-amd64 list-modules | grep -E 'http.handlers.cache|storages.cache.redis|http.handlers.waf|events.handlers.exec'
+./caddy-linux-amd64 list-modules | grep -E 'http.handlers.cache|storages.cache.redis|caddy.storage.redis|http.handlers.waf'
 ```
 
 ### Go version note
