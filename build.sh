@@ -48,6 +48,7 @@ echo ">>   cache-handler          ${CACHE_HANDLER_VERSION}"
 echo ">>   storages/redis/caddy   ${STORAGES_REDIS_VERSION}"
 echo ">>   caddy-dns/desec        ${DESEC_VERSION}"
 echo ">>   coraza-caddy/v2        ${CORAZA_VERSION}"
+echo ">>   caddy-events-exec      ${EVENTS_EXEC_VERSION}"
 echo ">>   GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=${CGO_ENABLED} GOTOOLCHAIN=${GOTOOLCHAIN}"
 
 # --- Build -----------------------------------------------------------------
@@ -56,6 +57,7 @@ xcaddy build "${CADDY_VERSION}" \
   --with "github.com/caddyserver/cache-handler@${CACHE_HANDLER_VERSION}" \
   --with "github.com/darkweak/storages/redis/caddy@${STORAGES_REDIS_VERSION}" \
   --with "github.com/caddy-dns/desec@${DESEC_VERSION}" \
-  --with "github.com/corazawaf/coraza-caddy/v2@${CORAZA_VERSION}"
+  --with "github.com/corazawaf/coraza-caddy/v2@${CORAZA_VERSION}" \
+  --with "github.com/mholt/caddy-events-exec@${EVENTS_EXEC_VERSION}"
 
 echo ">> built ${OUTPUT}"

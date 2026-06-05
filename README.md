@@ -27,6 +27,7 @@ server we don't control.
   | `github.com/darkweak/storages/redis/caddy` | `v0.0.19` | `storages.cache.redis` |
   | `github.com/caddy-dns/desec` | `v1.1.0` | `dns.providers.desec` |
   | `github.com/corazawaf/coraza-caddy/v2` | `v2.5.0` | `http.handlers.waf` (directive `coraza_waf`) |
+  | `github.com/mholt/caddy-events-exec` | `v0.1.0` | `events.handlers.exec` |
 
   `caddy-dns/cloudflare` is intentionally **not** included (legacy, removed from the fleet).
 
@@ -41,6 +42,7 @@ downstream Ansible role asserts on — do not guess them:
 - HTTP cache handler: **`http.handlers.cache`** (`v0.16.0`)
 - Redis cache storage: **`storages.cache.redis`** (`v0.0.19`)
 - Coraza WAF handler: **`http.handlers.waf`** (`v2.5.0`, Caddyfile directive `coraza_waf`)
+- Events exec handler: **`events.handlers.exec`** (`v0.1.0`, event handler under the global `events` app)
 
 > ⚠️ The Redis backend registers under Souin's cache-storage namespace as
 > **`storages.cache.redis`** — *not* `caddy.storage.redis` and *not* `caddy.storages.redis`.
@@ -94,11 +96,11 @@ https://github.com/x6c-co/caddy/releases/download/<TAG>/caddy-linux-amd64
 https://github.com/x6c-co/caddy/releases/download/<TAG>/SHA256SUMS
 ```
 
-For example, the current release `v2.11.3-a5t.2`:
+For example, the current release `v2.11.3-a5t.3`:
 
 ```
-https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.2/caddy-linux-amd64
-https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.2/SHA256SUMS
+https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.3/caddy-linux-amd64
+https://github.com/x6c-co/caddy/releases/download/v2.11.3-a5t.3/SHA256SUMS
 ```
 
 The SHA256 is in `SHA256SUMS` and in the release notes (also given pre-formatted as
@@ -113,7 +115,7 @@ Reproduces the exact CI build (same `xcaddy` invocation, same versions):
 go install github.com/caddyserver/xcaddy/cmd/xcaddy@v0.4.5
 
 ./build.sh                 # -> ./caddy-linux-amd64
-./caddy-linux-amd64 list-modules | grep -E 'http.handlers.cache|storages.cache.redis|http.handlers.waf'
+./caddy-linux-amd64 list-modules | grep -E 'http.handlers.cache|storages.cache.redis|http.handlers.waf|events.handlers.exec'
 ```
 
 ### Go version note
