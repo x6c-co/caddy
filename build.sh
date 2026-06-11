@@ -44,10 +44,6 @@ fi
 OUTPUT="${1:-caddy-linux-amd64}"
 
 echo ">> building Caddy ${CADDY_VERSION} -> ${OUTPUT}"
-echo ">>   cache-handler          ${CACHE_HANDLER_VERSION}"
-echo ">>   storages/redis/caddy   ${STORAGES_REDIS_VERSION}"
-echo ">>   caddy-storage-redis    ${CADDY_STORAGE_REDIS_VERSION}"
-echo ">>   caddy-dns/desec        ${DESEC_VERSION}"
 echo ">>   coraza-caddy/v2        ${CORAZA_VERSION}"
 echo ">>   GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=${CGO_ENABLED} GOTOOLCHAIN=${GOTOOLCHAIN}"
 
