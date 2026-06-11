@@ -54,10 +54,6 @@ echo ">>   GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=${CGO_ENABLED} GOTOOLCHAIN=
 # --- Build -----------------------------------------------------------------
 xcaddy build "${CADDY_VERSION}" \
   --output "${OUTPUT}" \
-  --with "github.com/caddyserver/cache-handler@${CACHE_HANDLER_VERSION}" \
-  --with "github.com/darkweak/storages/redis/caddy@${STORAGES_REDIS_VERSION}" \
-  --with "github.com/pberkel/caddy-storage-redis@${CADDY_STORAGE_REDIS_VERSION}" \
-  --with "github.com/caddy-dns/desec@${DESEC_VERSION}" \
   --with "github.com/corazawaf/coraza-caddy/v2@${CORAZA_VERSION}"
 
 echo ">> built ${OUTPUT}"

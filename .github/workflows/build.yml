@@ -54,11 +54,11 @@ jobs:
           ./caddy-linux-amd64 version | grep -q "${CADDY_VERSION}" \
             || { echo "::error::caddy version is not ${CADDY_VERSION}"; ./caddy-linux-amd64 version; exit 1; }
           mods="$(./caddy-linux-amd64 list-modules)"
-          for id in http.handlers.cache storages.cache.redis caddy.storage.redis dns.providers.desec http.handlers.waf; do
+          for id in http.handlers.waf; do
             echo "$mods" | grep -Fxq "$id" \
               || { echo "::error::missing required module: $id"; exit 1; }
           done
-          echo "OK: ${CADDY_VERSION} with http.handlers.cache, storages.cache.redis, caddy.storage.redis, dns.providers.desec, http.handlers.waf"
+          echo "OK: ${CADDY_VERSION} with http.handlers.waf"
 
       - name: Generate SHA256SUMS
         run: sha256sum caddy-linux-amd64 > SHA256SUMS
