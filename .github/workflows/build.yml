@@ -80,10 +80,6 @@ jobs:
             echo "## Compiled-in modules"
             echo "| Module ID | Source | Version |"
             echo "| --- | --- | --- |"
-            echo "| \`http.handlers.cache\` | github.com/caddyserver/cache-handler | ${CACHE_HANDLER_VERSION} |"
-            echo "| \`storages.cache.redis\` | github.com/darkweak/storages/redis/caddy | ${STORAGES_REDIS_VERSION} |"
-            echo "| \`caddy.storage.redis\` | github.com/pberkel/caddy-storage-redis | ${CADDY_STORAGE_REDIS_VERSION} |"
-            echo "| \`dns.providers.desec\` | github.com/caddy-dns/desec | ${DESEC_VERSION} |"
             echo "| \`http.handlers.waf\` | github.com/corazawaf/coraza-caddy/v2 | ${CORAZA_VERSION} |"
             echo
             echo "> \`http.handlers.waf\` (OWASP Coraza WAF) is compiled in but **inert** until a downstream Caddyfile uses the \`coraza_waf\` directive and loads rules. A \`list-modules\` presence check verifies **availability, not active protection**."
